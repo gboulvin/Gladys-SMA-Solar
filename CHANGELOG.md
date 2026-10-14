@@ -10,8 +10,6 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
-## [1.0.0] - 2026-10-14
-
 ### Added
 
 - First release of the SMA Solar integration: SMA inverters, hybrid and
@@ -34,5 +32,4 @@ the notes of the version's GitHub Release.
   available after a restart of Gladys.
 - English, French, German and Spanish texts and user documentation.
 
-[Unreleased]: https://github.com/gboulvin/Gladys-SMA-Solar/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/gboulvin/Gladys-SMA-Solar/releases/tag/v1.0.0
+[Unreleased]: https://github.com/gboulvin/Gladys-SMA-Solar/commits/main

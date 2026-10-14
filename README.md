@@ -1,5 +1,7 @@
 # SMA Solar for Gladys Assistant
 
+[![CI](https://github.com/gboulvin/Gladys-SMA-Solar/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/gboulvin/Gladys-SMA-Solar/actions/workflows/ci.yml)
+
 ![SMA Solar](cover.png)
 
 An external integration for [Gladys Assistant](https://gladysassistant.com)

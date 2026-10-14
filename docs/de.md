@@ -1,0 +1,142 @@
+# SMA Solar
+
+Verfolgen Sie Ihre SMA-Solaranlage in Gladys: Erzeugung, Tagesertrag,
+Batterie, Netzaustausch und Zustand jedes Geräts, **direkt im lokalen Netz**
+über Modbus TCP gelesen. Keine Cloud, kein Sunny-Portal-Konto, kein
+API-Schlüssel: Die Werte bleiben bei Ihnen zu Hause und kommen auch dann an,
+wenn das Internet ausfällt.
+
+## Kompatible Geräte
+
+Jedes SMA-Gerät, das das **SMA-Modbus-Profil** über TCP spricht, insbesondere:
+
+- PV-Wechselrichter: Sunny Boy, Sunny Tripower (auch die Serien X und CORE),
+  Sunny Highpower;
+- Hybrid-Wechselrichter: Sunny Tripower Smart Energy, Sunny Boy Smart Energy;
+- Batterie-Wechselrichter: Sunny Boy Storage, Sunny Island;
+- Geräte hinter einem SMA Data Manager oder Cluster Controller.
+
+Der Netzaustausch (Netzbezug und Einspeisung) erscheint, wenn ein **SMA
+Energy Meter** oder ein **Sunny Home Manager** mit dem Wechselrichter
+verbunden ist: Der Wechselrichter meldet ihn dann über Modbus.
+
+## Voraussetzungen
+
+1. **Aktivieren Sie Modbus TCP** an jedem Gerät. Je nach Generation:
+   - Geräte mit Weboberfläche (WebConnect, ennexOS): Melden Sie sich als
+     **Installateur** an, öffnen Sie **Geräteparameter → Externe
+     Kommunikation → Modbus → TCP-Server** und schalten Sie ihn **Ein**;
+   - im Sunny Portal verwaltete Geräte: **Konfiguration →
+     Gerätekonfiguration → Externe Kommunikation → Modbus → TCP-Server: Ein**;
+   - mit Sunny Explorer: derselbe Parameter, als Installateur angemeldet.
+2. Geben Sie jedem Gerät eine **feste IP-Adresse** (eine DHCP-Reservierung im
+   Router genügt).
+3. Gladys und die Geräte müssen im selben Netz sein, oder das Netz muss
+   Gladys den TCP-Port **502** der Geräte erreichen lassen.
+
+> Modbus TCP hat kein Passwort: Lassen Sie es im lokalen Netz und leiten Sie
+> Port 502 **niemals** in Ihrem Internet-Router weiter.
+
+## Konfiguration
+
+1. Öffnen Sie den Reiter **Konfiguration** der Integration.
+2. Tragen Sie unter **SMA-Geräte** die IP-Adresse jedes Geräts ein, durch
+   Kommas getrennt: `192.168.1.50, 192.168.1.51`.
+   - anderer Port: `192.168.1.50:1502`;
+   - andere Modbus-Unit-ID (Geräte hinter einem Data Manager, der die Unit-ID
+     jedes Geräts in seinen Modbus-Einstellungen anzeigt): `192.168.1.30/4`;
+   - beides: `192.168.1.30:502/5`.
+3. **Port** (502) und **Unit-ID** (3) gelten für die Adressen ohne eigene
+   Angabe: Behalten Sie sie, sofern Sie sie an den Geräten nicht geändert
+   haben.
+4. **Aktualisierungsintervall**: wie oft die Geräte gelesen werden,
+   standardmäßig 30 Sekunden (mindestens 10 Sekunden).
+5. **Erzeugungsschwelle**: die Leistung (in W, standardmäßig 50), ab der ein
+   Wechselrichter als erzeugend gilt, für die Szenenauslöser Erzeugung
+   gestartet / beendet.
+6. Speichern Sie und klicken Sie auf **Verbindung testen**: Die Liste der
+   antwortenden und der nicht antwortenden Geräte erscheint, mit dem Grund.
+7. Öffnen Sie den Reiter **Erkennung** und fügen Sie Ihre Geräte hinzu.
+
+## Was Sie erhalten
+
+Ein Gerät pro SMA-Gerät, benannt nach seiner Seriennummer, mit den
+Funktionen, die es bietet:
+
+| Funktion                                                      | Geräte            |
+| ------------------------------------------------------------- | ----------------- |
+| Solarerzeugung (W), Ertrag heute (kWh), gesamt (kWh)          | PV- und Hybrid-WR |
+| Batteriestand (%), Lade- / Entladeleistung (W), Energie (kWh) | Batterie, Hybrid  |
+| Netzbezug / Einspeisung (W), Energie (kWh)                    | mit Energy Meter  |
+| AC-Spannung (V), AC-Strom (A), Wechselrichtertemperatur (°C)  | alle              |
+
+Die Erzeugungs- und Batteriefunktionen speisen die **Energie**-Ansicht von
+Gladys. Jedes Gerät zeigt außerdem ein Abzeichen **lokal / nicht
+erreichbar**.
+
+Viele Wechselrichter schalten ihre Netzwerkschnittstelle nachts ab: Die
+Integration zeigt sie dann als nicht erreichbar mit einer Erzeugung von
+0 W an und merkt sie sich, damit sie nach einem Neustart von Gladys
+verfügbar bleiben.
+
+## Szenen
+
+Die Integration fügt dem Szeneneditor (Gladys 5.1 oder neuer) eigene Karten
+in der Kategorie **Integrationen** hinzu.
+
+Auslöser:
+
+- **Solarerzeugung gestartet** — ein Wechselrichter beginnt zu erzeugen
+  (seine Leistung überschreitet die Erzeugungsschwelle). Variablen: `power`,
+  `device_name`.
+- **Solarerzeugung beendet** — er hört auf (unter der halben Schwelle oder
+  schlafend). Variable `daily_energy`: die heute erzeugte Energie in kWh —
+  für einen täglichen Bericht.
+- **Zustand eines SMA-Geräts geändert** — der Zustand eines Geräts ändert
+  sich: OK, Warnung, Störung, aus oder nicht erreichbar. Filtern Sie auf den
+  neuen Zustand, um nur bei einer Störung benachrichtigt zu werden.
+  Variablen: `condition`, `previous_condition`, `device_name`.
+
+Lesen Sie die Variablen in den folgenden Aktionen mit
+`{{triggerEvent.data.<variable>}}`, z. B. „Ertrag heute:
+{{triggerEvent.data.daily_energy}} kWh".
+
+Aktionen:
+
+- **SMA-Gerät auslesen** — liest das gewählte Gerät sofort und übergibt den
+  folgenden Aktionen seine Werte: `reachable`, `condition`, `power`,
+  `daily_energy`, `battery_level`, `grid_import_power`, `grid_export_power`.
+- **Solaranlage auslesen** — liest alle Geräte und übergibt die Summen:
+  `power`, `daily_energy`, `battery_level` (Durchschnitt),
+  `grid_import_power`, `grid_export_power`, `reachable_devices`.
+
+Beispiel: Jeden Tag um 13 Uhr die Anlage auslesen und, wenn `power` über
+2000 W liegt, den Warmwasserbereiter einschalten.
+
+## Dashboard
+
+Zwei Widgets stehen zur Verfügung:
+
+- **Solaranlage** — aktuelle Erzeugung, Tagesertrag, Netzaustausch,
+  Batteriestand, ein Diagramm der heutigen Erzeugung und der Zustand jedes
+  Geräts, mit einer Schaltfläche **Aktualisieren**.
+- **SMA-Gerät** — wählen Sie ein Gerät in den Widget-Einstellungen: seine
+  Live-Werte, sein Zustand, seine Adresse, die letzte Messung, die
+  Temperatur und die Netzfrequenz.
+
+## Fehlerbehebung
+
+- **„connect ECONNREFUSED"**: Modbus TCP ist am Gerät nicht aktiviert oder
+  nutzt einen anderen Port.
+- **„connect EHOSTUNREACH" / Zeitüberschreitung**: falsche IP-Adresse, Gerät
+  aus oder schlafend (bei vielen Wechselrichtern nachts normal) oder eine
+  Firewall dazwischen.
+- **„No SMA serial number at this address"**: Das Gerät antwortet, aber
+  nicht mit dieser Unit-ID: Prüfen Sie sie (3 für einen direkt
+  angesprochenen Wechselrichter, sonst siehe Modbus-Einstellungen des Data
+  Managers).
+- **Ein Gerät erscheint doppelt**: Es ist unter zwei Adressen eingetragen;
+  behalten Sie eine.
+- Die Protokolle der Integration finden Sie in der Gladys-Oberfläche (oder
+  mit `docker logs`); starten Sie die Integration mit `LOG_LEVEL=debug` für
+  alle Details.

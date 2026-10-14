@@ -1,0 +1,570 @@
+{
+  "manifest_version": 1,
+  "type": "device",
+  "name": "SMA Solar",
+  "description": {
+    "en": "SMA inverters, batteries and energy meters on your local network (Modbus TCP).",
+    "fr": "Onduleurs, batteries et compteurs SMA sur votre réseau local (Modbus TCP).",
+    "de": "SMA-Wechselrichter, Batterien und Energiezähler im lokalen Netz (Modbus TCP).",
+    "es": "Inversores, baterías y contadores SMA en su red local (Modbus TCP)."
+  },
+  "version": "0.0.0",
+  "docker_image": "ghcr.io/gboulvin/gladys-sma-solar:0.0.0",
+  "gladys_version": ">=5.1.0",
+  "cover_image": "https://raw.githubusercontent.com/gboulvin/Gladys-SMA-Solar/main/cover.png",
+  "categories": ["energy"],
+  "transports": ["local"],
+  "config_schema": [
+    {
+      "key": "intro",
+      "type": "section",
+      "label": {
+        "en": "Before you start",
+        "fr": "Avant de commencer",
+        "de": "Bevor Sie beginnen",
+        "es": "Antes de empezar"
+      },
+      "description": {
+        "en": "The integration reads your SMA devices on the local network through Modbus TCP, without any cloud. Enable Modbus TCP on each device (Sunny Portal, Sunny Explorer or the device web interface, installer access), give it a fixed IP address, then enter that address below.",
+        "fr": "L'intégration lit vos appareils SMA sur le réseau local en Modbus TCP, sans aucun cloud. Activez Modbus TCP sur chaque appareil (Sunny Portal, Sunny Explorer ou l'interface web de l'appareil, accès installateur), donnez-lui une adresse IP fixe, puis saisissez cette adresse ci-dessous.",
+        "de": "Die Integration liest Ihre SMA-Geräte im lokalen Netz über Modbus TCP, ganz ohne Cloud. Aktivieren Sie Modbus TCP auf jedem Gerät (Sunny Portal, Sunny Explorer oder Weboberfläche des Geräts, Installateur-Zugang), vergeben Sie eine feste IP-Adresse und tragen Sie diese unten ein.",
+        "es": "La integración lee sus dispositivos SMA en la red local mediante Modbus TCP, sin ninguna nube. Active Modbus TCP en cada dispositivo (Sunny Portal, Sunny Explorer o la interfaz web del dispositivo, acceso de instalador), asígnele una dirección IP fija e introdúzcala a continuación."
+      },
+      "links": [
+        {
+          "url": "https://github.com/gboulvin/Gladys-SMA-Solar/blob/main/docs/en.md",
+          "label": {
+            "en": "Step-by-step guide",
+            "fr": "Guide pas à pas",
+            "de": "Schritt-für-Schritt-Anleitung",
+            "es": "Guía paso a paso"
+          }
+        }
+      ]
+    },
+    {
+      "key": "hosts",
+      "type": "string",
+      "label": {
+        "en": "SMA devices",
+        "fr": "Appareils SMA",
+        "de": "SMA-Geräte",
+        "es": "Dispositivos SMA"
+      },
+      "description": {
+        "en": "IP addresses of your SMA devices, separated by commas. Add :port or /unit_id to override the defaults (e.g. a device behind a Data Manager: 192.168.1.30/4).",
+        "fr": "Adresses IP de vos appareils SMA, séparées par des virgules. Ajoutez :port ou /unit_id pour changer les valeurs par défaut (ex. un appareil derrière un Data Manager : 192.168.1.30/4).",
+        "de": "IP-Adressen Ihrer SMA-Geräte, durch Kommas getrennt. Mit :port oder /unit_id überschreiben Sie die Standardwerte (z. B. ein Gerät hinter einem Data Manager: 192.168.1.30/4).",
+        "es": "Direcciones IP de sus dispositivos SMA, separadas por comas. Añada :puerto o /unit_id para cambiar los valores por defecto (p. ej. un dispositivo tras un Data Manager: 192.168.1.30/4)."
+      },
+      "placeholder": {
+        "en": "e.g. 192.168.1.50, 192.168.1.51",
+        "fr": "ex. 192.168.1.50, 192.168.1.51",
+        "de": "z. B. 192.168.1.50, 192.168.1.51",
+        "es": "p. ej. 192.168.1.50, 192.168.1.51"
+      },
+      "required": true
+    },
+    {
+      "key": "port",
+      "type": "number",
+      "label": {
+        "en": "Modbus TCP port",
+        "fr": "Port Modbus TCP",
+        "de": "Modbus-TCP-Port",
+        "es": "Puerto Modbus TCP"
+      },
+      "description": {
+        "en": "502 unless you changed it on the devices.",
+        "fr": "502, sauf si vous l'avez changé sur les appareils.",
+        "de": "502, sofern Sie ihn an den Geräten nicht geändert haben.",
+        "es": "502, salvo que lo haya cambiado en los dispositivos."
+      },
+      "required": false,
+      "default": 502,
+      "min": 1,
+      "max": 65535
+    },
+    {
+      "key": "unit_id",
+      "type": "number",
+      "label": {
+        "en": "Modbus unit ID",
+        "fr": "Identifiant d'unité Modbus",
+        "de": "Modbus-Unit-ID",
+        "es": "ID de unidad Modbus"
+      },
+      "description": {
+        "en": "3 for an SMA inverter reached directly.",
+        "fr": "3 pour un onduleur SMA interrogé directement.",
+        "de": "3 für einen direkt angesprochenen SMA-Wechselrichter.",
+        "es": "3 para un inversor SMA consultado directamente."
+      },
+      "required": false,
+      "default": 3,
+      "min": 1,
+      "max": 247
+    },
+    {
+      "key": "poll_frequency",
+      "type": "number",
+      "label": {
+        "en": "Refresh interval (s)",
+        "fr": "Intervalle de rafraîchissement (s)",
+        "de": "Aktualisierungsintervall (s)",
+        "es": "Intervalo de actualización (s)"
+      },
+      "description": {
+        "en": "How often the devices are read, in seconds.",
+        "fr": "Fréquence de lecture des appareils, en secondes.",
+        "de": "Wie oft die Geräte gelesen werden, in Sekunden.",
+        "es": "Frecuencia de lectura de los dispositivos, en segundos."
+      },
+      "required": false,
+      "default": 30,
+      "min": 10,
+      "max": 3600
+    },
+    {
+      "key": "production_threshold",
+      "type": "number",
+      "label": {
+        "en": "Production threshold (W)",
+        "fr": "Seuil de production (W)",
+        "de": "Erzeugungsschwelle (W)",
+        "es": "Umbral de producción (W)"
+      },
+      "description": {
+        "en": "Power above which an inverter is producing, for the production started / stopped scene triggers.",
+        "fr": "Puissance au-dessus de laquelle un onduleur produit, pour les déclencheurs de scène début / fin de production.",
+        "de": "Leistung, ab der ein Wechselrichter erzeugt, für die Szenenauslöser Erzeugung gestartet / beendet.",
+        "es": "Potencia a partir de la cual un inversor produce, para los disparadores de escena inicio / fin de producción."
+      },
+      "required": false,
+      "default": 50,
+      "min": 1,
+      "max": 100000
+    }
+  ],
+  "actions": [
+    {
+      "key": "test_connection",
+      "label": {
+        "en": "Test the connection",
+        "fr": "Tester la connexion",
+        "de": "Verbindung testen",
+        "es": "Probar la conexión"
+      },
+      "description": {
+        "en": "Contact every configured device and list the ones that answer.",
+        "fr": "Contacte chaque appareil configuré et liste ceux qui répondent.",
+        "de": "Kontaktiert jedes konfigurierte Gerät und listet die antwortenden auf.",
+        "es": "Contacta con cada dispositivo configurado y enumera los que responden."
+      },
+      "timeout_seconds": 120
+    }
+  ],
+  "scene_triggers": [
+    {
+      "key": "production_started",
+      "label": {
+        "en": "Solar production started",
+        "fr": "Début de production solaire",
+        "de": "Solarerzeugung gestartet",
+        "es": "Inicio de la producción solar"
+      },
+      "description": {
+        "en": "An SMA inverter starts producing (above the production threshold).",
+        "fr": "Un onduleur SMA commence à produire (au-dessus du seuil de production).",
+        "de": "Ein SMA-Wechselrichter beginnt zu erzeugen (über der Erzeugungsschwelle).",
+        "es": "Un inversor SMA empieza a producir (por encima del umbral de producción)."
+      },
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": { "en": "Inverter", "fr": "Onduleur", "de": "Wechselrichter", "es": "Inversor" }
+        }
+      ],
+      "variables": [
+        {
+          "key": "power",
+          "type": "number",
+          "label": {
+            "en": "Production power (W)",
+            "fr": "Puissance produite (W)",
+            "de": "Erzeugungsleistung (W)",
+            "es": "Potencia producida (W)"
+          }
+        },
+        {
+          "key": "device_name",
+          "type": "string",
+          "label": {
+            "en": "Device name",
+            "fr": "Nom de l'appareil",
+            "de": "Gerätename",
+            "es": "Nombre del dispositivo"
+          }
+        }
+      ]
+    },
+    {
+      "key": "production_stopped",
+      "label": {
+        "en": "Solar production stopped",
+        "fr": "Fin de production solaire",
+        "de": "Solarerzeugung beendet",
+        "es": "Fin de la producción solar"
+      },
+      "description": {
+        "en": "An SMA inverter stops producing, with the energy produced today.",
+        "fr": "Un onduleur SMA cesse de produire, avec l'énergie produite aujourd'hui.",
+        "de": "Ein SMA-Wechselrichter stellt die Erzeugung ein, mit dem heutigen Ertrag.",
+        "es": "Un inversor SMA deja de producir, con la energía producida hoy."
+      },
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": { "en": "Inverter", "fr": "Onduleur", "de": "Wechselrichter", "es": "Inversor" }
+        }
+      ],
+      "variables": [
+        {
+          "key": "daily_energy",
+          "type": "number",
+          "label": {
+            "en": "Energy produced today (kWh)",
+            "fr": "Énergie produite aujourd'hui (kWh)",
+            "de": "Heute erzeugte Energie (kWh)",
+            "es": "Energía producida hoy (kWh)"
+          }
+        },
+        {
+          "key": "device_name",
+          "type": "string",
+          "label": {
+            "en": "Device name",
+            "fr": "Nom de l'appareil",
+            "de": "Gerätename",
+            "es": "Nombre del dispositivo"
+          }
+        }
+      ]
+    },
+    {
+      "key": "condition_changed",
+      "label": {
+        "en": "SMA device condition changed",
+        "fr": "Changement d'état d'un appareil SMA",
+        "de": "Zustand eines SMA-Geräts geändert",
+        "es": "Cambio de estado de un dispositivo SMA"
+      },
+      "description": {
+        "en": "The operating condition of an SMA device changes: OK, warning, fault, off or unreachable.",
+        "fr": "L'état de fonctionnement d'un appareil SMA change : OK, avertissement, défaut, arrêté ou injoignable.",
+        "de": "Der Betriebszustand eines SMA-Geräts ändert sich: OK, Warnung, Störung, aus oder nicht erreichbar.",
+        "es": "El estado de funcionamiento de un dispositivo SMA cambia: OK, advertencia, fallo, apagado o inaccesible."
+      },
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": { "en": "Device", "fr": "Appareil", "de": "Gerät", "es": "Dispositivo" }
+        },
+        {
+          "key": "condition",
+          "type": "multi_select",
+          "label": {
+            "en": "New condition",
+            "fr": "Nouvel état",
+            "de": "Neuer Zustand",
+            "es": "Nuevo estado"
+          },
+          "options": [
+            { "value": "ok", "label": { "en": "OK", "fr": "OK", "de": "OK", "es": "OK" } },
+            {
+              "value": "warning",
+              "label": {
+                "en": "Warning",
+                "fr": "Avertissement",
+                "de": "Warnung",
+                "es": "Advertencia"
+              }
+            },
+            {
+              "value": "fault",
+              "label": { "en": "Fault", "fr": "Défaut", "de": "Störung", "es": "Fallo" }
+            },
+            {
+              "value": "off",
+              "label": { "en": "Off", "fr": "Arrêté", "de": "Aus", "es": "Apagado" }
+            },
+            {
+              "value": "unreachable",
+              "label": {
+                "en": "Unreachable",
+                "fr": "Injoignable",
+                "de": "Nicht erreichbar",
+                "es": "Inaccesible"
+              }
+            }
+          ]
+        }
+      ],
+      "variables": [
+        {
+          "key": "condition",
+          "type": "string",
+          "label": {
+            "en": "New condition",
+            "fr": "Nouvel état",
+            "de": "Neuer Zustand",
+            "es": "Nuevo estado"
+          }
+        },
+        {
+          "key": "previous_condition",
+          "type": "string",
+          "label": {
+            "en": "Previous condition",
+            "fr": "État précédent",
+            "de": "Vorheriger Zustand",
+            "es": "Estado anterior"
+          }
+        },
+        {
+          "key": "device_name",
+          "type": "string",
+          "label": {
+            "en": "Device name",
+            "fr": "Nom de l'appareil",
+            "de": "Gerätename",
+            "es": "Nombre del dispositivo"
+          }
+        }
+      ]
+    }
+  ],
+  "scene_actions": [
+    {
+      "key": "read_device",
+      "label": {
+        "en": "Read an SMA device",
+        "fr": "Lire un appareil SMA",
+        "de": "SMA-Gerät auslesen",
+        "es": "Leer un dispositivo SMA"
+      },
+      "description": {
+        "en": "Read the current values of an SMA device for the next actions of the scene.",
+        "fr": "Lit les valeurs actuelles d'un appareil SMA pour les actions suivantes de la scène.",
+        "de": "Liest die aktuellen Werte eines SMA-Geräts für die folgenden Aktionen der Szene.",
+        "es": "Lee los valores actuales de un dispositivo SMA para las siguientes acciones de la escena."
+      },
+      "timeout_seconds": 30,
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": { "en": "Device", "fr": "Appareil", "de": "Gerät", "es": "Dispositivo" },
+          "required": true
+        }
+      ],
+      "outputs": [
+        {
+          "key": "reachable",
+          "type": "boolean",
+          "label": {
+            "en": "Device reachable",
+            "fr": "Appareil joignable",
+            "de": "Gerät erreichbar",
+            "es": "Dispositivo accesible"
+          }
+        },
+        {
+          "key": "condition",
+          "type": "string",
+          "label": { "en": "Condition", "fr": "État", "de": "Zustand", "es": "Estado" }
+        },
+        {
+          "key": "power",
+          "type": "number",
+          "label": {
+            "en": "Production power (W)",
+            "fr": "Puissance produite (W)",
+            "de": "Erzeugungsleistung (W)",
+            "es": "Potencia producida (W)"
+          }
+        },
+        {
+          "key": "daily_energy",
+          "type": "number",
+          "label": {
+            "en": "Energy produced today (kWh)",
+            "fr": "Énergie produite aujourd'hui (kWh)",
+            "de": "Heute erzeugte Energie (kWh)",
+            "es": "Energía producida hoy (kWh)"
+          }
+        },
+        {
+          "key": "battery_level",
+          "type": "number",
+          "label": {
+            "en": "Battery level (%)",
+            "fr": "Niveau de batterie (%)",
+            "de": "Batteriestand (%)",
+            "es": "Nivel de batería (%)"
+          }
+        },
+        {
+          "key": "grid_import_power",
+          "type": "number",
+          "label": {
+            "en": "Power drawn from the grid (W)",
+            "fr": "Puissance soutirée au réseau (W)",
+            "de": "Netzbezug (W)",
+            "es": "Potencia tomada de la red (W)"
+          }
+        },
+        {
+          "key": "grid_export_power",
+          "type": "number",
+          "label": {
+            "en": "Power fed into the grid (W)",
+            "fr": "Puissance injectée sur le réseau (W)",
+            "de": "Netzeinspeisung (W)",
+            "es": "Potencia inyectada a la red (W)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "read_installation",
+      "label": {
+        "en": "Read the solar installation",
+        "fr": "Lire l'installation solaire",
+        "de": "Solaranlage auslesen",
+        "es": "Leer la instalación solar"
+      },
+      "description": {
+        "en": "Read every SMA device and give the totals of the installation to the next actions.",
+        "fr": "Lit tous les appareils SMA et donne les totaux de l'installation aux actions suivantes.",
+        "de": "Liest alle SMA-Geräte und übergibt die Summen der Anlage an die folgenden Aktionen.",
+        "es": "Lee todos los dispositivos SMA y entrega los totales de la instalación a las siguientes acciones."
+      },
+      "timeout_seconds": 120,
+      "outputs": [
+        {
+          "key": "power",
+          "type": "number",
+          "label": {
+            "en": "Production power (W)",
+            "fr": "Puissance produite (W)",
+            "de": "Erzeugungsleistung (W)",
+            "es": "Potencia producida (W)"
+          }
+        },
+        {
+          "key": "daily_energy",
+          "type": "number",
+          "label": {
+            "en": "Energy produced today (kWh)",
+            "fr": "Énergie produite aujourd'hui (kWh)",
+            "de": "Heute erzeugte Energie (kWh)",
+            "es": "Energía producida hoy (kWh)"
+          }
+        },
+        {
+          "key": "battery_level",
+          "type": "number",
+          "label": {
+            "en": "Battery level (%)",
+            "fr": "Niveau de batterie (%)",
+            "de": "Batteriestand (%)",
+            "es": "Nivel de batería (%)"
+          }
+        },
+        {
+          "key": "grid_import_power",
+          "type": "number",
+          "label": {
+            "en": "Power drawn from the grid (W)",
+            "fr": "Puissance soutirée au réseau (W)",
+            "de": "Netzbezug (W)",
+            "es": "Potencia tomada de la red (W)"
+          }
+        },
+        {
+          "key": "grid_export_power",
+          "type": "number",
+          "label": {
+            "en": "Power fed into the grid (W)",
+            "fr": "Puissance injectée sur le réseau (W)",
+            "de": "Netzeinspeisung (W)",
+            "es": "Potencia inyectada a la red (W)"
+          }
+        },
+        {
+          "key": "reachable_devices",
+          "type": "number",
+          "label": {
+            "en": "Devices that answered",
+            "fr": "Appareils ayant répondu",
+            "de": "Antwortende Geräte",
+            "es": "Dispositivos que respondieron"
+          }
+        }
+      ]
+    }
+  ],
+  "widgets": [
+    {
+      "key": "solar_overview",
+      "label": {
+        "en": "Solar installation",
+        "fr": "Installation solaire",
+        "de": "Solaranlage",
+        "es": "Instalación solar"
+      },
+      "description": {
+        "en": "Production, energy of the day, grid, battery and condition of your SMA devices.",
+        "fr": "Production, énergie du jour, réseau, batterie et état de vos appareils SMA.",
+        "de": "Erzeugung, Tagesertrag, Netz, Batterie und Zustand Ihrer SMA-Geräte.",
+        "es": "Producción, energía del día, red, batería y estado de sus dispositivos SMA."
+      },
+      "icon": "sun",
+      "action_timeout_seconds": 120
+    },
+    {
+      "key": "sma_device",
+      "label": {
+        "en": "SMA device",
+        "fr": "Appareil SMA",
+        "de": "SMA-Gerät",
+        "es": "Dispositivo SMA"
+      },
+      "description": {
+        "en": "Live values and condition of one SMA device.",
+        "fr": "Valeurs en direct et état d'un appareil SMA.",
+        "de": "Live-Werte und Zustand eines SMA-Geräts.",
+        "es": "Valores en directo y estado de un dispositivo SMA."
+      },
+      "icon": "zap",
+      "settings": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": { "en": "Device", "fr": "Appareil", "de": "Gerät", "es": "Dispositivo" },
+          "required": true
+        }
+      ],
+      "action_timeout_seconds": 30
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "name": "gladys-sma-solar",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Gladys Assistant integration for SMA solar inverters, batteries and energy meters, read locally over Modbus TCP.",
   "repository": {

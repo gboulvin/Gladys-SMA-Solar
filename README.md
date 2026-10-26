@@ -21,7 +21,7 @@ an SMA Energy Meter or Sunny Home Manager.
   _Read an SMA device_ and _Read the solar installation_.
 - **Dashboard widgets**: _Solar installation_ overview and _SMA device_.
 - **English, French, German and Spanish.**
-- Requires **Gladys 5.1.0** or later.
+- Requires **Gladys 5.3.0** or later.
 
 User documentation: [English](docs/en.md) · [Français](docs/fr.md) ·
 [Deutsch](docs/de.md) · [Español](docs/es.md).

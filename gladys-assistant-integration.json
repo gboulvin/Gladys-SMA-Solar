@@ -8,8 +8,8 @@
     "de": "SMA-Wechselrichter, Batterien und Energiezähler im lokalen Netz (Modbus TCP).",
     "es": "Inversores, baterías y contadores SMA en su red local (Modbus TCP)."
   },
-  "version": "1.0.1",
-  "docker_image": "ghcr.io/gboulvin/gladys-sma-solar:1.0.1",
+  "version": "1.1.0",
+  "docker_image": "ghcr.io/gboulvin/gladys-sma-solar:1.1.0",
   "gladys_version": ">=5.3.0",
   "cover_image": "https://raw.githubusercontent.com/gboulvin/Gladys-SMA-Solar/main/cover.png",
   "categories": ["energy"],
